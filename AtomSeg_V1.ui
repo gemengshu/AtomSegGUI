@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
+    <width>989</width>
     <height>1000</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Atom Segmentation</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTextEdit" name="imagePath">
@@ -20,7 +20,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>30</y>
       <width>821</width>
       <height>31</height>
@@ -56,7 +56,7 @@
    <widget class="QLabel" name="ori">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>120</y>
       <width>410</width>
       <height>410</height>
@@ -75,7 +75,7 @@
    <widget class="QLabel" name="model_output">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>440</x>
       <y>120</y>
       <width>410</width>
       <height>410</height>
@@ -94,7 +94,7 @@
    <widget class="QLabel" name="preprocess">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>540</y>
       <width>410</width>
       <height>410</height>
@@ -113,7 +113,7 @@
    <widget class="QLabel" name="detect_result">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>440</x>
       <y>540</y>
       <width>410</width>
       <height>410</height>
@@ -129,34 +129,11 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="denoise">
-    <property name="geometry">
-     <rect>
-      <x>880</x>
-      <y>590</y>
-      <width>91</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>DENOISE</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="se_num">
-    <property name="geometry">
-     <rect>
-      <x>880</x>
-      <y>550</y>
-      <width>91</width>
-      <height>31</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPushButton" name="revert">
     <property name="geometry">
      <rect>
       <x>880</x>
-      <y>630</y>
+      <y>360</y>
       <width>91</width>
       <height>31</height>
      </rect>
@@ -169,7 +146,7 @@
     <property name="geometry">
      <rect>
       <x>880</x>
-      <y>740</y>
+      <y>300</y>
       <width>91</width>
       <height>31</height>
      </rect>
@@ -182,7 +159,7 @@
     <property name="geometry">
      <rect>
       <x>880</x>
-      <y>860</y>
+      <y>880</y>
       <width>91</width>
       <height>31</height>
      </rect>
@@ -194,7 +171,7 @@
    <widget class="QComboBox" name="modelPath">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>70</y>
       <width>821</width>
       <height>31</height>
@@ -219,13 +196,88 @@
      </property>
     </item>
    </widget>
+   <widget class="QSlider" name="se_num">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>260</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="maximum">
+     <number>20</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="use_inter">
+    <property name="geometry">
+     <rect>
+      <x>860</x>
+      <y>110</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Use Interpolation</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>230</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Sans Serif</family>
+      <pointsize>10</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+      <kerning>false</kerning>
+     </font>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="text">
+     <string>Denoise Level</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="auto_save">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>920</y>
+      <width>101</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Auto Save</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1000</width>
+     <width>989</width>
      <height>20</height>
     </rect>
    </property>

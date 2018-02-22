@@ -15,7 +15,7 @@ from torchvision.transforms import ToTensor
 from torch.autograd import Variable
 import numpy as np
 import torchvision
-from utils import generateMask
+import cv2
 
 def PILImageToQImage(img):
     """Convert PIL image to QImage """
@@ -29,14 +29,16 @@ def map01(mat):
 class Code_MainWindow(Ui_MainWindow):
     def __init__(self, parent = None):
         super(Code_MainWindow, self).__init__()
-
+        
         self.setupUi(self)
         self.open.clicked.connect(self.BrowseFolder)
         self.load.clicked.connect(self.LoadModel)
+        self.se_num.valueChanged.connect(self.Denoise)
+        self.circle_detect.clicked.connect(self.CircleDetect)
         self.cuda = True
 
         self.__curdir = os.getcwd()
-
+        
         self.ori_content = None
 
         self.__models = {
@@ -45,9 +47,9 @@ class Code_MainWindow(Ui_MainWindow):
                 'Model 3' : self.__load_model3
         }
 
-
+        
     def BrowseFolder(self):
-        self.imagePath_content, _ = QFileDialog.getOpenFileName(self,
+        self.imagePath_content, _ = QFileDialog.getOpenFileName(self, 
                                                             "open",
                                                             "/home/",
                                                             "All Files (*);; Image Files (*.png *.tif *.jpg)")
@@ -181,33 +183,71 @@ class Code_MainWindow(Ui_MainWindow):
 
 
     def LoadModel(self):
-
+        
         self.modelPath_content = self.modelPath.currentText()
         self.__models[self.modelPath_content]()
 
+    def Denoise(self):
+        radius = self.se_num.value()
+        """changes should be done on the kernel generation"""
+        kernel = np.ones((radius, radius), np.int8)
 
+        opened_image = cv2.morphologyEx(self.model_output_content, cv2.MORPH_OPEN, kernel)
+
+        self.denoised_image = opened_image
+
+        output_image = Image.fromarray((self.denoised_image), mode = 'L')
+
+        ori_content_qt = PILImageToQImage(output_image)
+        pix_image = QPixmap(ori_content_qt)
+        self.preprocess.setPixmap(pix_image)
+        self.preprocess.show()       
+
+
+    def CircleDetect(self):
+        circles = cv2.HoughCircles(self.denoised_image, cv2.HOUGH_GRADIENT, 1, 20,
+            param1 = 50, param2 = 30, minRadius = 0, maxRadius = 0)
+        c_img = cv2.cvtColor(self.denoised_image, cv2.COLOR_GRAY2BGR)
+        circles = np.uint16(np.around(circles))
+
+        for i in circles[0,:]:
+    #        cv2.circle(c_img, (i[0], i[1]), i[2], (0,255,0),2)
+            cv2.circle(c_img,(i[0], i[1]), 2, (0, 0, 255), 3)
+        cv2.imwrite('c_image.png',c_img)
+
+        output_image = Image.fromarray((c_img), mode = 'RGB')
+
+        ori_content_qt = PILImageToQImage(output_image)
+        pix_image = QPixmap(ori_content_qt)
+        self.detect_result.setPixmap(pix_image)
+        self.detect_result.show()  
+
+    
     def release(self):
         return
 
-
+        
     def closeEvent(self, event):
         result = QtWidgets.QMessageBox.question(self,
                                             "Confirm Exit...",
                                             "Are you sure you want to exit?",
                                             QtWidgets.QMessageBox.Yes| QtWidgets.QMessageBox.No)
         event.ignore()
-
+        
         if result == QtWidgets.QMessageBox.Yes:
             self.release()
             event.accept()
-
-
+            
+            
 qtCreatorFile = "AtomSeg_V1.ui"
 
-Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
-
+Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)        
+    
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = Code_MainWindow()
     window.show()
     sys.exit(app.exec_())
+    
+    
+    
