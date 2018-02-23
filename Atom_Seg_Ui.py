@@ -5,13 +5,20 @@
 # Created by: PyQt5 UI code generator 5.6
 #
 # WARNING! All changes made in this file will be lost!
-
+import PyQt5
 from PyQt5 import QtCore, QtGui, QtWidgets
+
+if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+
+if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(989, 1000)
+        MainWindow.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowMaximizeButtonHint)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.imagePath = QtWidgets.QTextEdit(self.centralwidget)
