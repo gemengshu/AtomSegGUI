@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
 
-def generateMask(r):
-    mask = np.ones((5,5),np.uint8)
-    return mask
+
+def map01(data):
+	return (data - data.min())/(data.max() - data.min())
