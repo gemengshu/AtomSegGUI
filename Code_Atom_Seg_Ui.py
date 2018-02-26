@@ -22,6 +22,7 @@ from scipy import ndimage as ndi
 from skimage.filters import sobel
 from skimage.measure import regionprops
 from skimage.draw import set_color
+from utils import load_model1, load_model2, load_model3, GetIndexRangeOfBlk
 
 def PILImageToQImage(img):
     """Convert PIL image to QImage """
@@ -45,8 +46,6 @@ class Code_MainWindow(Ui_MainWindow):
         self.circle_detect.clicked.connect(self.CircleDetect)
 
         self.revert.clicked.connect(self.RevertAll)
-
-        self.cuda = self.use_cuda.isChecked()
 
         self.save.clicked.connect(self.Save)
 
@@ -79,39 +78,39 @@ class Code_MainWindow(Ui_MainWindow):
             self.ori.show()
 
     def __load_model1(self):
-        """/home/student/Documents/u-net_pytorch/epochs200_layer3_ori_256/"""
-        from model1 import UNet
-        unet = UNet()
-        model_path = self.__curdir + '/model1.pth'
-        if self.cuda:
-            unet = unet.cuda()
-
-        if not self.cuda:
-            unet.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
-        else:
-            unet.load_state_dict(torch.load(model_path))
         if not self.ori_content:
             raise Exception("No image is selected.")
-        transform = ToTensor()
-        ori_tensor = transform(self.ori_content)
-        if self.cuda:
-            ori_tensor = Variable(ori_tensor.cuda())
+        self.cuda = self.use_cuda.isChecked()
+        model_path = self.__curdir + '/model1.pth'
+
+        if self.height > 1000 and self.height < 1600:
+            blk_row = 2
+        elif self.height >1600:
+            blk_row = 4
         else:
-            ori_tensor = Variable(ori_tensor)
-        ori_tensor = torch.unsqueeze(ori_tensor,0)
-        output = unet(ori_tensor)
+            blk_row = 1
 
-        if self.cuda:
-            self.model_output_content = (output.data).cpu().numpy()
+        if self.width > 1000 and self.width < 1600:
+            blk_col = 2
+        elif self.height >1600:
+            blk_col = 4
         else:
-            self.model_output_content = (output.data).numpy()
+            blk_col = 1
+        result = np.zeros((self.width, self.height)) - 100
 
-        self.model_output_content = self.model_output_content[0,0,:,:]
+        for r in range(0, blk_row):
+            for c in range(0, blk_col):
 
-        self.model_output_content = map01(self.model_output_content)
+                inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = 2)
+                temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
+                temp_result = load_model1(model_path,
+                                          temp_image, self.cuda)
+                result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
+                                          result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
+
+        self.model_output_content = map01(result)
         self.model_output_content = (self.model_output_content * 255 / np.max(self.model_output_content)).astype('uint8')
         self.output_image = Image.fromarray((self.model_output_content), mode = 'L')
-
         ori_content_qt = PILImageToQImage(self.output_image)
         pix_image = QPixmap(ori_content_qt)
         self.model_output.setPixmap(pix_image)
@@ -119,85 +118,82 @@ class Code_MainWindow(Ui_MainWindow):
 
 
     def __load_model2(self):
-        """/home/student/Documents/u-net-pytorch-original/lr001_weightdecay00001/"""
-        from model2 import UNet
-        unet = UNet()
-        model_path = self.__curdir + '/model2.pth'
-        if self.cuda:
-            unet = unet.cuda()
-
-        if not self.cuda:
-            unet.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
-        else:
-            unet.load_state_dict(torch.load(model_path))
         if not self.ori_content:
             raise Exception("No image is selected.")
-        transform = ToTensor()
-        ori_tensor = transform(self.ori_content)
-        if self.cuda:
-            ori_tensor = Variable(ori_tensor.cuda())
+        self.cuda = self.use_cuda.isChecked()
+        model_path = self.__curdir + '/model2.pth'
+
+        if self.height > 1000 and self.height < 1600:
+            blk_row = 2
+        elif self.height >1600:
+            blk_row = 4
         else:
-            ori_tensor = Variable(ori_tensor)
-        ori_tensor = torch.unsqueeze(ori_tensor,0)
-        output = unet(ori_tensor)
+            blk_row = 1
 
-        if self.cuda:
-            self.model_output_content = (output.data).cpu().numpy()
+        if self.width > 1000 and self.width < 1600:
+            blk_col = 2
+        elif self.height >1600:
+            blk_col = 4
         else:
-            self.model_output_content = (output.data).numpy()
+            blk_col = 1
+        result = np.zeros((self.width, self.height)) - 100
 
-        self.model_output_content = self.model_output_content[0,0,:,:]
+        for r in range(0, blk_row):
+            for c in range(0, blk_col):
 
-        self.model_output_content = map01(self.model_output_content)
+                inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = 2)
+                temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
+                temp_result = load_model2(model_path,
+                                          temp_image, self.cuda)
+                result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
+                                          result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
+
+        self.model_output_content = map01(result)
         self.model_output_content = (self.model_output_content * 255 / np.max(self.model_output_content)).astype('uint8')
         self.output_image = Image.fromarray((self.model_output_content), mode = 'L')
-
         ori_content_qt = PILImageToQImage(self.output_image)
         pix_image = QPixmap(ori_content_qt)
         self.model_output.setPixmap(pix_image)
         self.model_output.show()
-
 
     def __load_model3(self):
-        """/home/student/Documents/u-net_denoising/dataset_small_mask/"""
-        from model3 import UNet
-        unet = UNet()
-        model_path = self.__curdir + '/model3.pth'
-        if self.cuda:
-            unet = unet.cuda()
-
-        if not self.cuda:
-            unet.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
-        else:
-            unet.load_state_dict(torch.load(model_path))
         if not self.ori_content:
             raise Exception("No image is selected.")
-        transform = ToTensor()
-        ori_tensor = transform(self.ori_content)
-        if self.cuda:
-            ori_tensor = Variable(ori_tensor.cuda())
+        self.cuda = self.use_cuda.isChecked()
+        model_path = self.__curdir + '/model3.pth'
+
+        if self.height > 1000 and self.height < 1600:
+            blk_row = 2
+        elif self.height >1600:
+            blk_row = 4
         else:
-            ori_tensor = Variable(ori_tensor)
-        ori_tensor = torch.unsqueeze(ori_tensor,0)
-        output = unet(ori_tensor)
+            blk_row = 1
 
-        if self.cuda:
-            self.model_output_content = (output.data).cpu().numpy()
+        if self.width > 1000 and self.width < 1600:
+            blk_col = 2
+        elif self.height >1600:
+            blk_col = 4
         else:
-            self.model_output_content = (output.data).numpy()
+            blk_col = 1
+        result = np.zeros((self.width, self.height)) - 100
 
-        self.model_output_content = self.model_output_content[0,0,:,:]
+        for r in range(0, blk_row):
+            for c in range(0, blk_col):
 
-        self.model_output_content = map01(self.model_output_content)
+                inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = 2)
+                temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
+                temp_result = load_model3(model_path,
+                                          temp_image, self.cuda)
+                result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
+                                          result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
+
+        self.model_output_content = map01(result)
         self.model_output_content = (self.model_output_content * 255 / np.max(self.model_output_content)).astype('uint8')
         self.output_image = Image.fromarray((self.model_output_content), mode = 'L')
-
         ori_content_qt = PILImageToQImage(self.output_image)
         pix_image = QPixmap(ori_content_qt)
         self.model_output.setPixmap(pix_image)
         self.model_output.show()
-
-
 
     def LoadModel(self):
 
@@ -224,7 +220,7 @@ class Code_MainWindow(Ui_MainWindow):
     def CircleDetect(self):
 
         elevation_map = sobel(self.denoised_image)
-        
+
         markers = np.zeros_like(self.denoised_image)
 
         markers[self.denoised_image < 30] = 1
@@ -249,11 +245,11 @@ class Code_MainWindow(Ui_MainWindow):
             c_y, c_x = p.centroid
 
             draw_out.ellipse([min([max([c_x - 2, 0]), self.width]),min([max([c_y - 2, 0]), self.height]),
-                min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])], 
-                fill = 'red', outline = 'red')    
+                min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])],
+                fill = 'red', outline = 'red')
             draw_ori.ellipse([min([max([c_x - 2, 0]), self.width]),min([max([c_y - 2, 0]), self.height]),
-                min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])], 
-                fill = 'red', outline = 'red')    
+                min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])],
+                fill = 'red', outline = 'red')
 
         ori_content_qt = PILImageToQImage(self.out_markers)
         pix_image = QPixmap(ori_content_qt)
@@ -261,11 +257,11 @@ class Code_MainWindow(Ui_MainWindow):
         self.detect_result.show()
 
     def ChangeThreshold(self):
-        min_thre_content = self.min_thre.value()  
+        min_thre_content = self.min_thre.value()
         max_thre_content = self.max_thre.value()
 
         elevation_map = sobel(self.denoised_image)
-        
+
         markers = np.zeros_like(self.denoised_image)
 
         markers[self.denoised_image < min_thre_content] = 1
@@ -290,11 +286,11 @@ class Code_MainWindow(Ui_MainWindow):
             c_y, c_x = p.centroid
 
             draw_out.ellipse([min([max([c_x - 2, 0]), self.width]),min([max([c_y - 2, 0]), self.height]),
-                min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])], 
-                fill = 'red', outline = 'red')    
+                min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])],
+                fill = 'red', outline = 'red')
             draw_ori.ellipse([min([max([c_x - 2, 0]), self.width]),min([max([c_y - 2, 0]), self.height]),
-                min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])], 
-                fill = 'red', outline = 'red')    
+                min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])],
+                fill = 'red', outline = 'red')
 
         ori_content_qt = PILImageToQImage(self.out_markers)
         pix_image = QPixmap(ori_content_qt)
@@ -318,20 +314,20 @@ class Code_MainWindow(Ui_MainWindow):
             file_name = self.imagePath_content.split('\\')[-1]
         else:
             raise Exception("Not supported system.")
-        
+
         suffix = '.' + file_name.split('.')[-1]
         name_no_suffix = file_name.replace(suffix, '')
 
         if self.auto_save.isChecked():
             if os.name == 'posix':
-                save_path = self.__curdir + '/' + name_no_suffix 
+                save_path = self.__curdir + '/' + name_no_suffix
             else:
                 save_path = self.__curdir + '\\' + name_no_suffix
         else:
             if os.name == 'posix':
                 path = QFileDialog.getExistingDirectory(self, "save", "/home",
                                                             QFileDialog.ShowDirsOnly
-                                                            | QFileDialog.DontResolveSymlinks) 
+                                                            | QFileDialog.DontResolveSymlinks)
                 save_path = path + '/' + name_no_suffix
             else:
                 path = QFileDialog.getExistingDirectory(self, "save", self.__curdir,

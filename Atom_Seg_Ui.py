@@ -7,6 +7,13 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import PyQt5
+
+if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+
+if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def setupUi(self, MainWindow):
@@ -194,4 +201,3 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.revert.setText(_translate("MainWindow", "REVERT"))
         self.save.setText(_translate("MainWindow", "SAVE"))
         self.auto_save.setText(_translate("MainWindow", "Auto Save"))
-
