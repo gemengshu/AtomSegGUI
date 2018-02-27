@@ -212,3 +212,4 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label_2.setText(_translate("MainWindow", "Min Threshold"))
         self.label_3.setText(_translate("MainWindow", "Max Threshold"))
         self.auto_save.setText(_translate("MainWindow", "Auto Save"))
+
