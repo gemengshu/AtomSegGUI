@@ -4,6 +4,7 @@ from torch.autograd import Variable
 import numpy as np
 import torchvision
 import importlib
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 def GetIndexRangeOfBlk(height, width, blk_row, blk_col, blk_r, blk_c, over_lap = 0):
 	blk_h_size = height//blk_row
@@ -93,3 +94,18 @@ def load_model(model_path, model_num, data, cuda):
 
 	result = result[0,0,:,:]
 	return result
+
+
+def PIL2Pixmap(im):
+    """Convert PIL image to QImage """
+    if im.mode == "RGB":
+        pass
+    elif im.mode == "L":
+        im = im.convert("RGBA")
+    data = im.convert("RGBA").tobytes("raw", "RGBA")
+    qim = QtGui.QImage(data, im.size[0], im.size[1], QtGui.QImage.Format_ARGB32)
+    pixmap = QtGui.QPixmap.fromImage(qim)
+    return pixmap
+
+def map01(mat):
+    return (mat - mat.min())/(mat.max() - mat.min())
