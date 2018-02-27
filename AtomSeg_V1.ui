@@ -143,6 +143,21 @@
       <string>Model 3</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>Model 4</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Model 5</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Model 6</string>
+     </property>
+    </item>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">

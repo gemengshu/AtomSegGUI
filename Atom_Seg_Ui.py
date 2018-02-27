@@ -16,7 +16,6 @@ if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
-    def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(989, 1000)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -55,6 +54,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.modelPath = QtWidgets.QComboBox(self.centralwidget)
         self.modelPath.setGeometry(QtCore.QRect(20, 70, 821, 31))
         self.modelPath.setObjectName("modelPath")
+        self.modelPath.addItem("")
+        self.modelPath.addItem("")
+        self.modelPath.addItem("")
         self.modelPath.addItem("")
         self.modelPath.addItem("")
         self.modelPath.addItem("")
@@ -191,6 +193,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.modelPath.setItemText(0, _translate("MainWindow", "Model 1"))
         self.modelPath.setItemText(1, _translate("MainWindow", "Model 2"))
         self.modelPath.setItemText(2, _translate("MainWindow", "Model 3"))
+        self.modelPath.setItemText(3, _translate("MainWindow", "Model 4"))
+        self.modelPath.setItemText(4, _translate("MainWindow", "Model 5"))
+        self.modelPath.setItemText(5, _translate("MainWindow", "Model 6"))
         self.label_2.setText(_translate("MainWindow", "Min Threshold"))
         self.label_3.setText(_translate("MainWindow", "Max Threshold"))
         self.use_cuda.setText(_translate("MainWindow", "Use CUDA"))
@@ -201,3 +206,4 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.revert.setText(_translate("MainWindow", "REVERT"))
         self.save.setText(_translate("MainWindow", "SAVE"))
         self.auto_save.setText(_translate("MainWindow", "Auto Save"))
+
