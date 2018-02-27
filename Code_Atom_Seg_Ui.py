@@ -250,12 +250,12 @@ class Code_MainWindow(Ui_MainWindow):
 
 
     def Save(self):
-        if os.name == 'posix':
-            file_name = self.imagePath_content.split('/')[-1]
-        elif os.name == 'nt':
-            file_name = self.imagePath_content.split('\\')[-1]
-        else:
-            raise Exception("Not supported system.")
+#        if os.name == 'posix':
+        file_name = self.imagePath_content.split('/')[-1]
+#        elif os.name == 'nt':
+#            file_name = self.imagePath_content.split('\\')[-1]
+#       else:
+#            raise Exception("Not supported system.")
 
         suffix = '.' + file_name.split('.')[-1]
         name_no_suffix = file_name.replace(suffix, '')
