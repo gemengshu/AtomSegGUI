@@ -23,7 +23,7 @@ from scipy import ndimage as ndi
 from skimage.filters import sobel
 from skimage.measure import regionprops
 from skimage.draw import set_color
-from utils import load_model1, load_model2, load_model3, GetIndexRangeOfBlk
+from utils import load_model1, load_model2, load_model3, GetIndexRangeOfBlk, load_model
 
 
 def PILImageToQImage(img):
@@ -68,13 +68,20 @@ class Code_MainWindow(Ui_MainWindow):
         self.denoised_image = None
 
         self.__models = {
-                'Model 1' : self.__load_model1,
-                'Model 2' : self.__load_model2,
-                'Model 3' : self.__load_model3,
-                'Model 4' : self.__load_model4,
-                'Model 5' : self.__load_model5,
-                'Model 6' : self.__load_model6
+                'Model 1' : 1,
+                'Model 2' : 2,
+                'Model 3' : 3,
+                'Model 4' : 4,
+                'Model 5' : 5,
+                'Model 6' : 6
         }
+
+        self.__model_paths = ['/model1.pth',
+                              '/model2.pth',
+                              '/model3.pth',
+                              '/atomseg_bupt_new_10/model_epoch_200.pth',
+                              '/atomseg_bupt_new_100/model_epoch_200.pth',
+                              '/atom_seg_gaussian_mask/model_epoch_200.pth']
 
 
     def BrowseFolder(self):
@@ -91,11 +98,11 @@ class Code_MainWindow(Ui_MainWindow):
             self.ori.setPixmap(pix_image)
             self.ori.show()
 
-    def __load_model1(self):
+    def __load_model(self):
         if not self.ori_content:
             raise Exception("No image is selected.")
         self.cuda = self.use_cuda.isChecked()
-        model_path = self.__curdir + '/model1.pth'
+        model_path = self.__curdir + self.__model_paths[self.model_num - 1]
 
         if self.height > 1000 and self.height < 1600:
             blk_row = 2
@@ -117,204 +124,7 @@ class Code_MainWindow(Ui_MainWindow):
 
                 inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = 2)
                 temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
-                temp_result = load_model1(model_path,
-                                          temp_image, self.cuda)
-                result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
-                                          result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
-
-        self.model_output_content = map01(result)
-        self.model_output_content = (self.model_output_content * 255 / np.max(self.model_output_content)).astype('uint8')
-        self.output_image = Image.fromarray((self.model_output_content), mode = 'L')
-        ori_content_qt = PILImageToQImage(self.output_image)
-        pix_image = QPixmap(ori_content_qt)
-        self.model_output.setPixmap(pix_image)
-        self.model_output.show()
-
-
-    def __load_model2(self):
-        if not self.ori_content:
-            raise Exception("No image is selected.")
-        self.cuda = self.use_cuda.isChecked()
-        model_path = self.__curdir + '/model2.pth'
-
-        if self.height > 1000 and self.height < 1600:
-            blk_row = 2
-        elif self.height >1600:
-            blk_row = 4
-        else:
-            blk_row = 1
-
-        if self.width > 1000 and self.width < 1600:
-            blk_col = 2
-        elif self.height >1600:
-            blk_col = 4
-        else:
-            blk_col = 1
-        result = np.zeros((self.width, self.height)) - 100
-
-        for r in range(0, blk_row):
-            for c in range(0, blk_col):
-
-                inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = 2)
-                temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
-                temp_result = load_model2(model_path,
-                                          temp_image, self.cuda)
-                result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
-                                          result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
-
-        self.model_output_content = map01(result)
-        self.model_output_content = (self.model_output_content * 255 / np.max(self.model_output_content)).astype('uint8')
-        self.output_image = Image.fromarray((self.model_output_content), mode = 'L')
-        ori_content_qt = PILImageToQImage(self.output_image)
-        pix_image = QPixmap(ori_content_qt)
-        self.model_output.setPixmap(pix_image)
-        self.model_output.show()
-
-    def __load_model3(self):
-        if not self.ori_content:
-            raise Exception("No image is selected.")
-        self.cuda = self.use_cuda.isChecked()
-        model_path = self.__curdir + '/model3.pth'
-
-        if self.height > 1000 and self.height < 1600:
-            blk_row = 2
-        elif self.height >1600:
-            blk_row = 4
-        else:
-            blk_row = 1
-
-        if self.width > 1000 and self.width < 1600:
-            blk_col = 2
-        elif self.height >1600:
-            blk_col = 4
-        else:
-            blk_col = 1
-        result = np.zeros((self.width, self.height)) - 100
-
-        for r in range(0, blk_row):
-            for c in range(0, blk_col):
-
-                inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = 2)
-                temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
-                temp_result = load_model3(model_path,
-                                          temp_image, self.cuda)
-                result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
-                                          result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
-
-        self.model_output_content = map01(result)
-        self.model_output_content = (self.model_output_content * 255 / np.max(self.model_output_content)).astype('uint8')
-        self.output_image = Image.fromarray((self.model_output_content), mode = 'L')
-        ori_content_qt = PILImageToQImage(self.output_image)
-        pix_image = QPixmap(ori_content_qt)
-        self.model_output.setPixmap(pix_image)
-        self.model_output.show()
-
-    def __load_model4(self):
-        if not self.ori_content:
-            raise Exception("No image is selected.")
-        self.cuda = self.use_cuda.isChecked()
-        model_path = self.__curdir +'/atomseg_bupt_new_10/model_epoch_200.pth'
-
-        if self.height > 1000 and self.height < 1600:
-            blk_row = 2
-        elif self.height >1600:
-            blk_row = 4
-        else:
-            blk_row = 1
-
-        if self.width > 1000 and self.width < 1600:
-            blk_col = 2
-        elif self.height >1600:
-            blk_col = 4
-        else:
-            blk_col = 1
-        result = np.zeros((self.width, self.height)) - 100
-
-        for r in range(0, blk_row):
-            for c in range(0, blk_col):
-
-                inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = 2)
-                temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
-                temp_result = load_model4(model_path,
-                                          temp_image, self.cuda)
-                result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
-                                          result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
-
-        self.model_output_content = map01(result)
-        self.model_output_content = (self.model_output_content * 255 / np.max(self.model_output_content)).astype('uint8')
-        self.output_image = Image.fromarray((self.model_output_content), mode = 'L')
-        ori_content_qt = PILImageToQImage(self.output_image)
-        pix_image = QPixmap(ori_content_qt)
-        self.model_output.setPixmap(pix_image)
-        self.model_output.show()
-
-    def __load_model5(self):
-        if not self.ori_content:
-            raise Exception("No image is selected.")
-        self.cuda = self.use_cuda.isChecked()
-        model_path = self.__curdir +'/atomseg_bupt_new_100/model_epoch_200.pth'
-
-        if self.height > 1000 and self.height < 1600:
-            blk_row = 2
-        elif self.height >1600:
-            blk_row = 4
-        else:
-            blk_row = 1
-
-        if self.width > 1000 and self.width < 1600:
-            blk_col = 2
-        elif self.height >1600:
-            blk_col = 4
-        else:
-            blk_col = 1
-        result = np.zeros((self.width, self.height)) - 100
-
-        for r in range(0, blk_row):
-            for c in range(0, blk_col):
-
-                inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = 2)
-                temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
-                temp_result = load_model5(model_path,
-                                          temp_image, self.cuda)
-                result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
-                                          result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
-
-        self.model_output_content = map01(result)
-        self.model_output_content = (self.model_output_content * 255 / np.max(self.model_output_content)).astype('uint8')
-        self.output_image = Image.fromarray((self.model_output_content), mode = 'L')
-        ori_content_qt = PILImageToQImage(self.output_image)
-        pix_image = QPixmap(ori_content_qt)
-        self.model_output.setPixmap(pix_image)
-        self.model_output.show()
-
-    def __load_model6(self):
-        if not self.ori_content:
-            raise Exception("No image is selected.")
-        self.cuda = self.use_cuda.isChecked()
-        model_path = self.__curdir +'/atom_seg_gaussian_mask/model_epoch_200.pth'
-
-        if self.height > 1000 and self.height < 1600:
-            blk_row = 2
-        elif self.height >1600:
-            blk_row = 4
-        else:
-            blk_row = 1
-
-        if self.width > 1000 and self.width < 1600:
-            blk_col = 2
-        elif self.height >1600:
-            blk_col = 4
-        else:
-            blk_col = 1
-        result = np.zeros((self.width, self.height)) - 100
-
-        for r in range(0, blk_row):
-            for c in range(0, blk_col):
-
-                inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = 2)
-                temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
-                temp_result = load_model6(model_path,
-                                          temp_image, self.cuda)
+                temp_result = load_model(model_path, self.model_num, temp_image, self.cuda)
                 result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
                                           result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
 
@@ -329,7 +139,10 @@ class Code_MainWindow(Ui_MainWindow):
     def LoadModel(self):
 
         self.modelPath_content = self.modelPath.currentText()
-        self.__models[self.modelPath_content]()
+        self.model_num = self.__models[self.modelPath_content]
+
+        self.__load_model()
+
         self.Denoise()
 
     def Denoise(self):

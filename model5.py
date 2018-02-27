@@ -1,9 +1,9 @@
 # unet.py
-# 
+#
 
 from __future__ import division
 import torch.nn as nn
-import torch.nn.functional as F 
+import torch.nn.functional as F
 import torch
 from numpy.linalg import svd
 from numpy.random import normal
@@ -80,7 +80,7 @@ class UNet(nn.Module):
 
 #		xup = F.relu(self.conv5_2(F.relu(self.conv5_1(self.maxpool(x4)))))
 		#print('x5 size: %d'%(xup.zie(2)))
-		
+
 #		xup = self.bn5(self.upconv5(self.upsample(xup)))
 		xup = self.bn4(self.upconv4(self.upsample(xup)))
 #		cropidx = (x4.size(2) - xup.size(2)) // 2
@@ -127,7 +127,3 @@ class UNet(nn.Module):
 			elif isinstance(m, nn.BatchNorm2d):
 				m.weight.data.fill_(1)
 				m.bias.data.zero_()
-
-
-unet = UNet().cuda()
-		

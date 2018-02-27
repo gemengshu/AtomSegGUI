@@ -16,6 +16,7 @@ if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
+    def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(989, 1000)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -206,4 +207,3 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.revert.setText(_translate("MainWindow", "REVERT"))
         self.save.setText(_translate("MainWindow", "SAVE"))
         self.auto_save.setText(_translate("MainWindow", "Auto Save"))
-
