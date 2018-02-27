@@ -7,6 +7,7 @@ from Atom_Seg_Ui import Ui_MainWindow
 import sys
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import QPainter
 from PIL import Image, ImageDraw
 from PIL.ImageQt import ImageQt
 import torch
@@ -23,6 +24,7 @@ from skimage.filters import sobel
 from skimage.measure import regionprops
 from skimage.draw import set_color
 from utils import load_model1, load_model2, load_model3, GetIndexRangeOfBlk
+
 
 def PILImageToQImage(img):
     """Convert PIL image to QImage """
@@ -49,12 +51,21 @@ class Code_MainWindow(Ui_MainWindow):
 
         self.save.clicked.connect(self.Save)
 
+        self.ori.mousePressEvent = self.drawPoint
+        self.model_output.mousePressEvent = self.drawPoint
+        self.preprocess.mousePressEvent = self.drawPoint
+        self.detect_result.mousePressEvent = self.drawPoint
+
         self.__curdir = os.getcwd()
 
         self.ori_content = None
         self.output_image = None
         self.ori_markers = None
         self.out_markers = None
+
+        self.pos = None
+
+        self.denoised_image = None
 
         self.__models = {
                 'Model 1' : self.__load_model1,
@@ -199,6 +210,7 @@ class Code_MainWindow(Ui_MainWindow):
 
         self.modelPath_content = self.modelPath.currentText()
         self.__models[self.modelPath_content]()
+        self.Denoise()
 
     def Denoise(self):
         radius = self.se_num.value()
@@ -218,6 +230,7 @@ class Code_MainWindow(Ui_MainWindow):
 
 
     def CircleDetect(self):
+
 
         elevation_map = sobel(self.denoised_image)
 
@@ -351,6 +364,18 @@ class Code_MainWindow(Ui_MainWindow):
         im_save.save(new_save_name)
 
 
+    def drawPoint(self, event):
+        self.pos = event.pos()
+        self.update()
+
+ #   def paintEvent(self, event):
+ #       if self.pos:
+ #           p = QPainter()
+ #           p.begin(self)
+ #           p.setBrush(QtGui.QColor(0,255,0))
+ #           p.drawEllipse(self.ori.mapToParent(QtCore.QPoint(self.pos.x(), self.pos.y())), 5,5)
+ #           self.centralwidget.raise_()
+ #           p.end()
 
 
     def release(self):
