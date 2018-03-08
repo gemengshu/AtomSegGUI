@@ -351,6 +351,17 @@ class Code_MainWindow(Ui_MainWindow):
 
 
     def release(self):
+        self.model_output.clear()
+        self.se_num.setValue(0)
+        self.preprocess.clear()
+        self.min_thre.setValue(30)
+        self.detect_result.clear()
+        self.max_thre.setValue(150)
+        self.ori.clear()
+        del self.props
+        del self.output_image
+        del self.ori_markers
+        del self.out_markers
         return
 
 
