@@ -305,7 +305,12 @@ class Code_MainWindow(Ui_MainWindow):
 
         if opt == 'Atom positions':
             new_save_name = _path + '_pos_' + self.modelPath_content + '.txt'
-            np.savetxt(new_save_name, self.props)
+            file = open(new_save_name, 'w')
+            for p in self.props:
+                line = p.centroid + p.bbox_area
+                for i in len(line):
+                    file.write( "%5.2f\t" % (line[i]))
+                file.write("\n")
 
         if opt == 'Save ALL':
             new_save_name = _path + '_output_' + self.modelPath_content + suffix
@@ -321,7 +326,12 @@ class Code_MainWindow(Ui_MainWindow):
             im_save.save(new_save_name)
             del im_save
             new_save_name = _path + '_pos_' + self.modelPath_content + '.txt'
-            np.savetxt(new_save_name, self.props)
+            file = open(new_save_name, 'w')
+            for p in self.props:
+                line = p.centroid + p.bbox_area
+                for i in len(line):
+                    file.write( "%5.2f\t" % (line[i]))
+                file.write("\n")
 
 
     def drawPoint(self, event):
