@@ -288,11 +288,11 @@ class Code_MainWindow(Ui_MainWindow):
         if opt == 'Model output':
             new_save_name = _path + '_output_' + self.modelPath_content + suffix
             self.output_image.save(new_save_name)
-            break
+
         if opt == 'Original image with markers':
             new_save_name = _path + '_origin_' + self.modelPath_content + suffix
             self.ori_markers.save(new_save_name)
-            break
+
         if opt == 'Four-panel image':
             new_save_name = _path + '_four_panel_' + self.modelPath_content + suffix
             im_save = Image.new('RGB', ((self.width + 1) * 2, (self.height + 1) * 2))
@@ -302,11 +302,11 @@ class Code_MainWindow(Ui_MainWindow):
             im_save.paste(self.out_markers, (self.width + 2, self.height + 2))
             im_save.save(new_save_name)
             del im_save
-            break
+
         if opt == 'Atom positions':
             new_save_name = _path + '_pos_' + self.modelPath_content + '.txt'
             np.savetxt(new_save_name, self.props)
-            break
+
         if opt == 'Save ALL':
             new_save_name = _path + '_output_' + self.modelPath_content + suffix
             self.output_image.save(new_save_name)
