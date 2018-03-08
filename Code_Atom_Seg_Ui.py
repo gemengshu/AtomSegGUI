@@ -166,7 +166,7 @@ class Code_MainWindow(Ui_MainWindow):
 
         label_objects, nb_labels = ndi.label(filled_regions)
 
-        props = regionprops(label_objects)
+        self.props = regionprops(label_objects)
 
         self.out_markers = Image.fromarray(np.dstack((self.denoised_image,self.denoised_image,self.denoised_image)), mode = 'RGB')
 
@@ -180,7 +180,7 @@ class Code_MainWindow(Ui_MainWindow):
         draw_out = ImageDraw.Draw(self.out_markers)
         draw_ori = ImageDraw.Draw(self.ori_markers)
 
-        for p in props:
+        for p in self.props:
             c_y, c_x = p.centroid
             draw_out.ellipse([min([max([c_x - 2, 0]), self.width]),min([max([c_y - 2, 0]), self.height]),
                 min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])],
@@ -192,7 +192,7 @@ class Code_MainWindow(Ui_MainWindow):
         pix_image = PIL2Pixmap(self.out_markers)
         self.detect_result.setPixmap(pix_image)
         self.detect_result.show()
-        del props
+#        del props
 
     def ChangeThreshold(self):
         min_thre_content = self.min_thre.value()
@@ -210,7 +210,7 @@ class Code_MainWindow(Ui_MainWindow):
         filled_regions = ndi.binary_fill_holes(seg_1 - 1)
         label_objects, nb_labels = ndi.label(filled_regions)
 
-        props = regionprops(label_objects)
+        self.props = regionprops(label_objects)
 
         self.out_markers = Image.fromarray(np.dstack((self.denoised_image,self.denoised_image,self.denoised_image)), mode = 'RGB')
 
@@ -225,7 +225,7 @@ class Code_MainWindow(Ui_MainWindow):
         draw_out = ImageDraw.Draw(self.out_markers)
         draw_ori = ImageDraw.Draw(self.ori_markers)
 
-        for p in props:
+        for p in self.props:
             c_y, c_x = p.centroid
 
             draw_out.ellipse([min([max([c_x - 2, 0]), self.width]),min([max([c_y - 2, 0]), self.height]),
@@ -238,7 +238,7 @@ class Code_MainWindow(Ui_MainWindow):
         pix_image = PIL2Pixmap(self.out_markers)
         self.detect_result.setPixmap(pix_image)
         self.detect_result.show()
-        del props
+#        del props
 
     def RevertAll(self):
         self.model_output.clear()
@@ -247,16 +247,11 @@ class Code_MainWindow(Ui_MainWindow):
         self.min_thre.setValue(30)
         self.detect_result.clear()
         self.max_thre.setValue(150)
+        del self.props
 
+    def GetSavePath(self):
 
-    def Save(self):
-#        if os.name == 'posix':
         file_name = self.imagePath_content.split('/')[-1]
-#        elif os.name == 'nt':
-#            file_name = self.imagePath_content.split('\\')[-1]
-#       else:
-#            raise Exception("Not supported system.")
-
         suffix = '.' + file_name.split('.')[-1]
         name_no_suffix = file_name.replace(suffix, '')
 
@@ -281,17 +276,52 @@ class Code_MainWindow(Ui_MainWindow):
             os.mkdir(save_path)
 
         if os.name == 'posix':
-            new_save_name = save_path + '/' + name_no_suffix + self.modelPath_content + suffix
+            temp_path = save_path + '/' + name_no_suffix
         else:
-            new_save_name = save_path + '\\' + name_no_suffix + self.modelPath_content + suffix
+            temp_path = save_path + '\\' + name_no_suffix
 
-        im_save = Image.new('RGB', ((self.width + 1) * 2, (self.height + 1) * 2))
-        im_save.paste(self.ori_content, (0,0))
-        im_save.paste(self.output_image, (self.width + 2, 0))
-        im_save.paste(self.ori_markers, (0, self.height + 2))
-        im_save.paste(self.out_markers, (self.width + 2, self.height + 2))
-        im_save.save(new_save_name)
-        del im_save
+        return temp_path, suffix
+
+    def Save(self):
+        opt = self.save_option.currentText()
+        _path, suffix = self.GetSavePath()
+        if opt == 'Model output':
+            new_save_name = _path + '_output_' + self.modelPath_content + suffix
+            self.output_image.save(new_save_name)
+            break
+        if opt == 'Original image with markers':
+            new_save_name = _path + '_origin_' + self.modelPath_content + suffix
+            self.ori_markers.save(new_save_name)
+            break
+        if opt == 'Four-panel image':
+            new_save_name = _path + '_four_panel_' + self.modelPath_content + suffix
+            im_save = Image.new('RGB', ((self.width + 1) * 2, (self.height + 1) * 2))
+            im_save.paste(self.ori_content, (0,0))
+            im_save.paste(self.output_image, (self.width + 2, 0))
+            im_save.paste(self.ori_markers, (0, self.height + 2))
+            im_save.paste(self.out_markers, (self.width + 2, self.height + 2))
+            im_save.save(new_save_name)
+            del im_save
+            break
+        if opt == 'Atom positions':
+            new_save_name = _path + '_pos_' + self.modelPath_content + '.txt'
+            np.savetxt(new_save_name, self.props)
+            break
+        if opt == 'Save ALL':
+            new_save_name = _path + '_output_' + self.modelPath_content + suffix
+            self.output_image.save(new_save_name)
+            new_save_name = _path + '_origin_' + self.modelPath_content + suffix
+            self.ori_markers.save(new_save_name)
+            new_save_name = _path + '_four_panel_' + self.modelPath_content + suffix
+            im_save = Image.new('RGB', ((self.width + 1) * 2, (self.height + 1) * 2))
+            im_save.paste(self.ori_content, (0,0))
+            im_save.paste(self.output_image, (self.width + 2, 0))
+            im_save.paste(self.ori_markers, (0, self.height + 2))
+            im_save.paste(self.out_markers, (self.width + 2, self.height + 2))
+            im_save.save(new_save_name)
+            del im_save
+            new_save_name = _path + '_pos_' + self.modelPath_content + '.txt'
+            np.savetxt(new_save_name, self.props)
 
 
     def drawPoint(self, event):
