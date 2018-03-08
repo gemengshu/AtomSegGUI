@@ -307,10 +307,11 @@ class Code_MainWindow(Ui_MainWindow):
             new_save_name = _path + '_pos_' + self.modelPath_content + '.txt'
             file = open(new_save_name, 'w')
             for p in self.props:
-                line = p.centroid + p.bbox_area
-                for i in len(line):
-                    file.write( "%5.2f\t" % (line[i]))
+                c_y, c_x = p.centroid
+                min_row, min_col, max_row, max_col = p.bbox
+                file.write( "%s"%((c_y, c_x, min_row, min_col, max_row, max_col),))
                 file.write("\n")
+            file.close()
 
         if opt == 'Save ALL':
             new_save_name = _path + '_output_' + self.modelPath_content + suffix
@@ -328,10 +329,11 @@ class Code_MainWindow(Ui_MainWindow):
             new_save_name = _path + '_pos_' + self.modelPath_content + '.txt'
             file = open(new_save_name, 'w')
             for p in self.props:
-                line = p.centroid + p.bbox_area
-                for i in len(line):
-                    file.write( "%5.2f\t" % (line[i]))
+                c_y, c_x = p.centroid
+                min_row, min_col, max_row, max_col = p.bbox
+                file.write( "%s"%((c_y, c_x, min_row, min_col, max_row, max_col),))
                 file.write("\n")
+            file.close()
 
 
     def drawPoint(self, event):
