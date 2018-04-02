@@ -17,7 +17,7 @@ from torchvision.transforms import ToTensor
 from torch.autograd import Variable
 import numpy as np
 import torchvision
-from skimage.morphology import opening, watershed, disk
+from skimage.morphology import opening, watershed, disk, erosion
 from skimage.feature import canny
 from scipy import ndimage as ndi
 from skimage.filters import sobel
@@ -95,19 +95,26 @@ class Code_MainWindow(Ui_MainWindow):
         self.cuda = self.use_cuda.isChecked()
         model_path = self.__curdir + self.__model_paths[self.model_num - 1]
 
-        if self.height > 1000 and self.height < 1600:
-            blk_row = 2
-        elif self.height >1600:
-            blk_row = 4
-        else:
-            blk_row = 1
+        if self.split.isChecked():
 
-        if self.width > 1000 and self.width < 1600:
-            blk_col = 2
-        elif self.height >1600:
-            blk_col = 4
+            if self.height > 1024 and self.height < 1600:
+                blk_row = 2
+            elif self.height >1600:
+                blk_row = 4
+            else:
+                blk_row = 1
+
+            if self.width > 1024 and self.width < 1600:
+                blk_col = 2
+            elif self.height >1600:
+                blk_col = 4
+            else:
+                blk_col = 1
         else:
             blk_col = 1
+            blk_row = 1
+
+
         result = np.zeros((self.width, self.height)) - 100
 
         for r in range(0, blk_row):
@@ -143,7 +150,10 @@ class Code_MainWindow(Ui_MainWindow):
         """changes should be done on the kernel generation"""
         kernel = disk(radius)
 
-        self.denoised_image = opening(self.model_output_content, kernel)
+        if self.denoise_method.currentText == 'Opening':
+            self.denoised_image = opening(self.model_output_content, kernel)
+        else:
+            self.denoised_image = erosion(self.model_output_content, kernel)
 
         temp_image = Image.fromarray(self.denoised_image, mode = 'L')
 
@@ -182,11 +192,11 @@ class Code_MainWindow(Ui_MainWindow):
 
         for p in self.props:
             c_y, c_x = p.centroid
-            draw_out.ellipse([min([max([c_x - 2, 0]), self.width]),min([max([c_y - 2, 0]), self.height]),
-                min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])],
+            draw_out.ellipse([min([max([c_x - 3, 0]), self.width]),min([max([c_y - 3, 0]), self.height]),
+                min([max([c_x + 3, 0]), self.width]),min([max([c_y + 3, 0]), self.height])],
                 fill = 'red', outline = 'red')
-            draw_ori.ellipse([min([max([c_x - 2, 0]), self.width]),min([max([c_y - 2, 0]), self.height]),
-                min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])],
+            draw_ori.ellipse([min([max([c_x - 3, 0]), self.width]),min([max([c_y - 3, 0]), self.height]),
+                min([max([c_x + 3, 0]), self.width]),min([max([c_y + 3, 0]), self.height])],
                 fill = 'red', outline = 'red')
 
         pix_image = PIL2Pixmap(self.out_markers)
@@ -247,13 +257,14 @@ class Code_MainWindow(Ui_MainWindow):
         self.min_thre.setValue(30)
         self.detect_result.clear()
         self.max_thre.setValue(150)
-        del self.props
+#        del self.props
 
     def GetSavePath(self):
 
         file_name = self.imagePath_content.split('/')[-1]
         suffix = '.' + file_name.split('.')[-1]
         name_no_suffix = file_name.replace(suffix, '')
+        has_content = True
 
         if self.auto_save.isChecked():
             if os.name == 'posix':
@@ -265,26 +276,38 @@ class Code_MainWindow(Ui_MainWindow):
                 path = QFileDialog.getExistingDirectory(self, "save", "/home",
                                                             QFileDialog.ShowDirsOnly
                                                             | QFileDialog.DontResolveSymlinks)
+                if not path:
+                    has_content = False
+
                 save_path = path + '/' + name_no_suffix
             else:
                 path = QFileDialog.getExistingDirectory(self, "save", self.__curdir,
                                                         QFileDialog.ShowDirsOnly
                                                         | QFileDialog.DontResolveSymlinks)
+                if not path:
+                    has_content = False
                 save_path = path + '\\' + name_no_suffix
 
-        if not exists(save_path):
-            os.mkdir(save_path)
+        if has_content:
+            if not exists(save_path):
+                os.mkdir(save_path)
 
-        if os.name == 'posix':
-            temp_path = save_path + '/' + name_no_suffix
+            if os.name == 'posix':
+                temp_path = save_path + '/' + name_no_suffix
+            else:
+                temp_path = save_path + '\\' + name_no_suffix
         else:
-            temp_path = save_path + '\\' + name_no_suffix
+            temp_path = None
 
         return temp_path, suffix
 
     def Save(self):
         opt = self.save_option.currentText()
         _path, suffix = self.GetSavePath()
+
+        if  not _path:
+            return
+
         if opt == 'Model output':
             new_save_name = _path + '_output_' + self.modelPath_content + suffix
             self.output_image.save(new_save_name)
