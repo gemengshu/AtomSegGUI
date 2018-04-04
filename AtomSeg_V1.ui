@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1001</width>
+    <width>1003</width>
     <height>1077</height>
    </rect>
   </property>
@@ -156,6 +156,31 @@
     <item>
      <property name="text">
       <string>Model 6</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>circularMask</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>guassianMask</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>denoise</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>denoise&amp;bgremoval</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>denoise&amp;bgremoval&amp;superres</string>
      </property>
     </item>
    </widget>
@@ -449,7 +474,7 @@
      <rect>
       <x>860</x>
       <y>150</y>
-      <width>131</width>
+      <width>141</width>
       <height>21</height>
      </rect>
     </property>
@@ -508,6 +533,41 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <widget class="QComboBox" name="change_size">
+    <property name="geometry">
+     <rect>
+      <x>860</x>
+      <y>180</y>
+      <width>131</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Do Nothing</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Down sample  by 2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Up sample by 2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Down sample by 4</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Up sample by 4</string>
+     </property>
+    </item>
+   </widget>
    <zorder>imagePath</zorder>
    <zorder>open</zorder>
    <zorder>ori</zorder>
@@ -532,13 +592,14 @@
    <zorder>split</zorder>
    <zorder>denoise_method</zorder>
    <zorder>label_4</zorder>
+   <zorder>change_size</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1001</width>
+     <width>1003</width>
      <height>20</height>
     </rect>
    </property>

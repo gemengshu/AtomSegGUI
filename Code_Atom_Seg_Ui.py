@@ -49,6 +49,7 @@ class Code_MainWindow(Ui_MainWindow):
 
         self.__curdir = os.getcwd() #current directory
 
+        self.ori_image = None
         self.ori_content = None  #original image, PIL format
         self.output_image = None #output image of model, PIL format
         self.ori_markers = None  #for saving usage, it's a rgb image of original, and with detection result on it
@@ -58,6 +59,7 @@ class Code_MainWindow(Ui_MainWindow):
         self.pos = None
 
         self.denoised_image = None
+        self.props = None
 
         self.__models = {
                 'Model 1' : 1,
@@ -65,7 +67,12 @@ class Code_MainWindow(Ui_MainWindow):
                 'Model 3' : 3,
                 'Model 4' : 4,
                 'Model 5' : 5,
-                'Model 6' : 6
+                'Model 6' : 6,
+                'circularMask': 7,
+                'guassianMask': 8,
+                'denoise': 9,
+                'denoise&bgremoval': 10,
+                'denoise&bgremoval&superres': 11
         }
 
         self.__model_paths = ['/model1.pth',
@@ -73,7 +80,12 @@ class Code_MainWindow(Ui_MainWindow):
                               '/model3.pth',
                               '/atomseg_bupt_new_10/model_epoch_200.pth',
                               '/atomseg_bupt_new_100/model_epoch_200.pth',
-                              '/atom_seg_gaussian_mask/model_epoch_200.pth']
+                              '/atom_seg_gaussian_mask/model_epoch_200.pth',
+                              '/circularMask.pth',
+                              '/guassianMask.pth',
+                              '/denoise.pth',
+                              '/denoise&bgremoval.pth',
+                              '/denoise&bgremoval&superres.pth']
 
 
     def BrowseFolder(self):
@@ -83,17 +95,42 @@ class Code_MainWindow(Ui_MainWindow):
                                                             "All Files (*);; Image Files (*.png *.tif *.jpg)")
         if self.imagePath_content:
             self.imagePath.setText(self.imagePath_content)
-            self.ori_content = Image.open(self.imagePath_content).convert('L')
-            self.height, self.width = self.ori_content.size
-            pix_image = PIL2Pixmap(self.ori_content)
+            self.ori_image = Image.open(self.imagePath_content).convert('L')
+
+            self.width, self.height = self.ori_image.size
+            pix_image = PIL2Pixmap(self.ori_image)
             self.ori.setPixmap(pix_image)
             self.ori.show()
+            self.ori_content = self.ori_image
 
     def __load_model(self):
-        if not self.ori_content:
+        if not self.ori_image:
             raise Exception("No image is selected.")
         self.cuda = self.use_cuda.isChecked()
         model_path = self.__curdir + self.__model_paths[self.model_num - 1]
+
+        if self.change_size.currentText() == 'Down sample by 2':
+            self.width, self.height = self.ori_image.size
+            self.ori_content = self.ori_image.resize((self.width//2,self.height//2), Image.BILINEAR)
+        else:
+            if self.change_size.currentText() == 'Up sample by 2':
+                self.width, self.height = self.ori_image.size
+                self.ori_content = self.ori_image.resize((self.width*2, self.height*2), Image.BICUBIC)
+            else:
+                if self.change_size.currentText() == 'Down sample by 4':
+                    self.width, self.height = self.ori_image.size
+                    self.ori_content = self.ori_image.resize((self.width//4, self.height//4), Image.BILINEAR)
+                else:
+                    if self.change_size.currentText() == 'Up sample by 4':
+                        self.width, self.height = self.ori_image.size
+                        self.ori_content = self.ori_image.resize((self.width*4, self.height*4), Image.BICUBIC)
+                    else: 
+                        self.ori_content = self.ori_image
+        
+
+
+
+        self.width, self.height = self.ori_content.size
 
         if self.split.isChecked():
 
@@ -257,6 +294,7 @@ class Code_MainWindow(Ui_MainWindow):
         self.min_thre.setValue(30)
         self.detect_result.clear()
         self.max_thre.setValue(150)
+        del self.ori_content
 #        del self.props
 
     def GetSavePath(self):
@@ -264,6 +302,8 @@ class Code_MainWindow(Ui_MainWindow):
         file_name = self.imagePath_content.split('/')[-1]
         suffix = '.' + file_name.split('.')[-1]
         name_no_suffix = file_name.replace(suffix, '')
+        if not self.change_size.currentText() == 'Do Nothing':
+            name_no_suffix = name_no_suffix + '_' + self.change_size.currentText()
         has_content = True
 
         if self.auto_save.isChecked():

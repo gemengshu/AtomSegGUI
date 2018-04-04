@@ -6,6 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5
 
@@ -16,10 +17,9 @@ if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
-
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1001, 1077)
+        MainWindow.resize(1003, 1077)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.imagePath = QtWidgets.QTextEdit(self.centralwidget)
@@ -56,6 +56,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.modelPath = QtWidgets.QComboBox(self.centralwidget)
         self.modelPath.setGeometry(QtCore.QRect(20, 70, 821, 31))
         self.modelPath.setObjectName("modelPath")
+        self.modelPath.addItem("")
+        self.modelPath.addItem("")
+        self.modelPath.addItem("")
+        self.modelPath.addItem("")
+        self.modelPath.addItem("")
         self.modelPath.addItem("")
         self.modelPath.addItem("")
         self.modelPath.addItem("")
@@ -156,7 +161,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.revert.setGeometry(QtCore.QRect(880, 570, 91, 31))
         self.revert.setObjectName("revert")
         self.split = QtWidgets.QCheckBox(self.centralwidget)
-        self.split.setGeometry(QtCore.QRect(860, 150, 131, 21))
+        self.split.setGeometry(QtCore.QRect(860, 150, 141, 21))
         self.split.setChecked(True)
         self.split.setObjectName("split")
         self.denoise_method = QtWidgets.QComboBox(self.centralwidget)
@@ -176,6 +181,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label_4.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
         self.label_4.setObjectName("label_4")
+        self.change_size = QtWidgets.QComboBox(self.centralwidget)
+        self.change_size.setGeometry(QtCore.QRect(860, 180, 131, 23))
+        self.change_size.setObjectName("change_size")
+        self.change_size.addItem("")
+        self.change_size.addItem("")
+        self.change_size.addItem("")
+        self.change_size.addItem("")
+        self.change_size.addItem("")
         self.imagePath.raise_()
         self.open.raise_()
         self.ori.raise_()
@@ -200,9 +213,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.split.raise_()
         self.denoise_method.raise_()
         self.label_4.raise_()
+        self.change_size.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1001, 20))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1003, 20))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -223,6 +237,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.modelPath.setItemText(3, _translate("MainWindow", "Model 4"))
         self.modelPath.setItemText(4, _translate("MainWindow", "Model 5"))
         self.modelPath.setItemText(5, _translate("MainWindow", "Model 6"))
+        self.modelPath.setItemText(6, _translate("MainWindow", "circularMask"))
+        self.modelPath.setItemText(7, _translate("MainWindow", "guassianMask"))
+        self.modelPath.setItemText(8, _translate("MainWindow", "denoise"))
+        self.modelPath.setItemText(9, _translate("MainWindow", "denoise&bgremoval"))
+        self.modelPath.setItemText(10, _translate("MainWindow", "denoise&bgremoval&superres"))
         self.label_2.setText(_translate("MainWindow", "Min Threshold"))
         self.label_3.setText(_translate("MainWindow", "Max Threshold"))
         self.use_cuda.setText(_translate("MainWindow", "Use CUDA"))
@@ -242,4 +261,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.denoise_method.setItemText(0, _translate("MainWindow", "Opening"))
         self.denoise_method.setItemText(1, _translate("MainWindow", "Erosion"))
         self.label_4.setText(_translate("MainWindow", "Denoise Method"))
+        self.change_size.setItemText(0, _translate("MainWindow", "Do Nothing"))
+        self.change_size.setItemText(1, _translate("MainWindow", "Down sample  by 2"))
+        self.change_size.setItemText(2, _translate("MainWindow", "Up sample by 2"))
+        self.change_size.setItemText(3, _translate("MainWindow", "Down sample by 4"))
+        self.change_size.setItemText(4, _translate("MainWindow", "Up sample by 4"))
 

@@ -43,10 +43,14 @@ def GetIndexRangeOfBlk(height, width, blk_row, blk_col, blk_r, blk_c, over_lap =
 
 
 def load_model(model_path, model_num, data, cuda):
-	model_name = 'model' + str(model_num)
-	module = importlib.import_module(model_name, package = None)
+	if model_num == 1:
+		from unet_softsign import UNet
+	else:
+		from unet_sigmoid import UNet
+#	model_name = 'model' + str(model_num)
+#	module = importlib.import_module(model_name, package = None)
 	use_padding = False
-	unet = module.UNet()
+	unet = UNet()
 
 	if cuda:
 		unet = unet.cuda()
