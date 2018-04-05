@@ -34,18 +34,14 @@ class Code_MainWindow(Ui_MainWindow):
         self.open.clicked.connect(self.BrowseFolder)
         self.load.clicked.connect(self.LoadModel)
         self.se_num.valueChanged.connect(self.Denoise)
-        self.min_thre.valueChanged.connect(self.ChangeThreshold)
-        self.max_thre.valueChanged.connect(self.ChangeThreshold)
+
         self.circle_detect.clicked.connect(self.CircleDetect)
 
         self.revert.clicked.connect(self.RevertAll)
 
         self.save.clicked.connect(self.Save)
 
-#        self.ori.mousePressEvent = self.drawPoint
-#        self.model_output.mousePressEvent = self.drawPoint
-#        self.preprocess.mousePressEvent = self.drawPoint
-#        self.detect_result.mousePressEvent = self.drawPoint
+
 
         self.__curdir = os.getcwd() #current directory
 
@@ -56,7 +52,6 @@ class Code_MainWindow(Ui_MainWindow):
         self.out_markers = None  #for saving usage, it's a rgb image of result after denoising, and with detection result on it
         self.model_output_content = None # 2d array of model output
 
-        self.pos = None
 
         self.denoised_image = None
         self.props = None
@@ -99,6 +94,7 @@ class Code_MainWindow(Ui_MainWindow):
 
             self.width, self.height = self.ori_image.size
             pix_image = PIL2Pixmap(self.ori_image)
+            pix_image.scaled(self.ori.size(), QtCore.Qt.KeepAspectRatio)
             self.ori.setPixmap(pix_image)
             self.ori.show()
             self.ori_content = self.ori_image
@@ -128,7 +124,10 @@ class Code_MainWindow(Ui_MainWindow):
                         self.ori_content = self.ori_image
         
 
-
+        pix_image = PIL2Pixmap(self.ori_content)
+        pix_image.scaled(self.ori.size(), QtCore.Qt.KeepAspectRatio)
+        self.ori.setPixmap(pix_image)
+        self.ori.show()
 
         self.width, self.height = self.ori_content.size
 
@@ -143,7 +142,7 @@ class Code_MainWindow(Ui_MainWindow):
 
             if self.width > 1024 and self.width < 1600:
                 blk_col = 2
-            elif self.height >1600:
+            elif self.width >1600:
                 blk_col = 4
             else:
                 blk_col = 1
@@ -152,7 +151,7 @@ class Code_MainWindow(Ui_MainWindow):
             blk_row = 1
 
 
-        result = np.zeros((self.width, self.height)) - 100
+        result = np.zeros((self.height, self.width)) - 100
 
         for r in range(0, blk_row):
             for c in range(0, blk_col):
@@ -167,6 +166,7 @@ class Code_MainWindow(Ui_MainWindow):
         self.model_output_content = (self.model_output_content * 255 / np.max(self.model_output_content)).astype('uint8')
         self.output_image = Image.fromarray((self.model_output_content), mode = 'L')
         pix_image = PIL2Pixmap(self.output_image)
+        pix_image.scaled(self.model_output.size(), QtCore.Qt.KeepAspectRatio)
         self.model_output.setPixmap(pix_image)
         self.model_output.show()
         del temp_image
@@ -202,12 +202,25 @@ class Code_MainWindow(Ui_MainWindow):
 
     def CircleDetect(self):
         elevation_map = sobel(self.denoised_image)
-        markers = np.zeros_like(self.denoised_image)
 
-        markers[self.denoised_image < 30] = 1
-        markers[self.denoised_image > 150] = 2
+        from scipy import ndimage as ndi
+        distance = ndi.distance_transform_edt(self.denoised_image)
+        from skimage.feature import peak_local_max
+        local_maxi = peak_local_max(distance, indices = False, footprint = np.ones((3,3)), labels = self.denoised_image)
+        markers = np.zeros_like(self.denoised_image)
+#        markers = ndi.label(local_maxi)[0]
+        if self.set_thre.isChecked() and self.thre.text():
+            max_thre = int(self.thre.text()) * 2.55
+        else:
+            max_thre = 100
+
+        min_thre = 30
+        markers[self.denoised_image < min_thre] = 1
+        markers[self.denoised_image > max_thre] = 2
 
         seg_1 = watershed(elevation_map, markers)
+        
+#        seg_1 = watershed(-distance, markers,mask = self.denoised_image)
 
         filled_regions = ndi.binary_fill_holes(seg_1 - 1)
 
@@ -229,52 +242,6 @@ class Code_MainWindow(Ui_MainWindow):
 
         for p in self.props:
             c_y, c_x = p.centroid
-            draw_out.ellipse([min([max([c_x - 3, 0]), self.width]),min([max([c_y - 3, 0]), self.height]),
-                min([max([c_x + 3, 0]), self.width]),min([max([c_y + 3, 0]), self.height])],
-                fill = 'red', outline = 'red')
-            draw_ori.ellipse([min([max([c_x - 3, 0]), self.width]),min([max([c_y - 3, 0]), self.height]),
-                min([max([c_x + 3, 0]), self.width]),min([max([c_y + 3, 0]), self.height])],
-                fill = 'red', outline = 'red')
-
-        pix_image = PIL2Pixmap(self.out_markers)
-        self.detect_result.setPixmap(pix_image)
-        self.detect_result.show()
-#        del props
-
-    def ChangeThreshold(self):
-        min_thre_content = self.min_thre.value()
-        max_thre_content = self.max_thre.value()
-
-        elevation_map = sobel(self.denoised_image)
-
-        markers = np.zeros_like(self.denoised_image)
-
-        markers[self.denoised_image < min_thre_content] = 1
-        markers[self.denoised_image > max_thre_content] = 2
-
-        seg_1 = watershed(elevation_map, markers)
-
-        filled_regions = ndi.binary_fill_holes(seg_1 - 1)
-        label_objects, nb_labels = ndi.label(filled_regions)
-
-        self.props = regionprops(label_objects)
-
-        self.out_markers = Image.fromarray(np.dstack((self.denoised_image,self.denoised_image,self.denoised_image)), mode = 'RGB')
-
-        ori_array = np.array(self.ori_content)
-        self.ori_markers = Image.fromarray(np.dstack((ori_array,ori_array,ori_array)), mode = 'RGB')
-
-        del ori_array
-        del elevation_map
-        del markers, seg_1,filled_regions,label_objects, nb_labels
-        del ori_array
-
-        draw_out = ImageDraw.Draw(self.out_markers)
-        draw_ori = ImageDraw.Draw(self.ori_markers)
-
-        for p in self.props:
-            c_y, c_x = p.centroid
-
             draw_out.ellipse([min([max([c_x - 2, 0]), self.width]),min([max([c_y - 2, 0]), self.height]),
                 min([max([c_x + 2, 0]), self.width]),min([max([c_y + 2, 0]), self.height])],
                 fill = 'red', outline = 'red')
@@ -287,13 +254,12 @@ class Code_MainWindow(Ui_MainWindow):
         self.detect_result.show()
 #        del props
 
+
     def RevertAll(self):
         self.model_output.clear()
         self.se_num.setValue(0)
         self.preprocess.clear()
-        self.min_thre.setValue(30)
         self.detect_result.clear()
-        self.max_thre.setValue(150)
         del self.ori_content
 #        del self.props
 
@@ -417,9 +383,7 @@ class Code_MainWindow(Ui_MainWindow):
         self.model_output.clear()
         self.se_num.setValue(0)
         self.preprocess.clear()
-        self.min_thre.setValue(30)
         self.detect_result.clear()
-        self.max_thre.setValue(150)
         self.ori.clear()
         del self.props
         del self.output_image

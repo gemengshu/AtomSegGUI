@@ -32,7 +32,7 @@ def GetIndexRangeOfBlk(height, width, blk_row, blk_col, blk_r, blk_c, over_lap =
 		lower_right_c = upper_left_c + blk_w_size
 		ol_lower_right_c = min(lower_right_c + over_lap, height)
 
-	return (upper_left_r, upper_left_c, lower_right_r, lower_right_c), (ol_upper_left_r, ol_upper_left_c, ol_lower_right_r, ol_lower_right_c)
+	return (upper_left_c, upper_left_r, lower_right_c, lower_right_r), (ol_upper_left_c, ol_upper_left_r, ol_lower_right_c, ol_lower_right_r)
 
 """Model 1 : /home/student/Documents/u-net_pytorch/epochs200_layer3_ori_256/"""
 """Model 2 : /home/student/Documents/u-net-pytorch-original/lr001_weightdecay00001/"""
@@ -74,6 +74,7 @@ def load_model(model_path, model_num, data, cuda):
 	padding_bottom = 0
 	ori_height = ori_tensor.size()[2]
 	ori_width = ori_tensor.size()[3]
+
 	if ori_height % 4:
 		padding_top = (4 - ori_height % 4)//2
 		padding_bottom = 4 - ori_height % 4 - padding_top
