@@ -30,7 +30,7 @@ def GetIndexRangeOfBlk(height, width, blk_row, blk_col, blk_r, blk_c, over_lap =
 		ol_lower_right_c = lower_right_c
 	else:
 		lower_right_c = upper_left_c + blk_w_size
-		ol_lower_right_c = min(lower_right_c + over_lap, height)
+		ol_lower_right_c = min(lower_right_c + over_lap, width)
 
 	return (upper_left_c, upper_left_r, lower_right_c, lower_right_r), (ol_upper_left_c, ol_upper_left_r, ol_lower_right_c, ol_lower_right_r)
 

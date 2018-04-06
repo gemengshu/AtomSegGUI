@@ -87,10 +87,21 @@ class Code_MainWindow(Ui_MainWindow):
         self.imagePath_content, _ = QFileDialog.getOpenFileName(self,
                                                             "open",
                                                             "/home/",
-                                                            "All Files (*);; Image Files (*.png *.tif *.jpg)")
+                                                            "All Files (*);; Image Files (*.png *.tif *.jpg *.ser)")
+
         if self.imagePath_content:
             self.imagePath.setText(self.imagePath_content)
-            self.ori_image = Image.open(self.imagePath_content).convert('L')
+            file_name = self.imagePath_content.split('/')[-1]
+            suffix = '.' + file_name.split('.')[-1]
+            if suffix == '.ser':
+                import serReader
+                ser_data = serReader.serReader(self.imagePath_content)
+                ser_array = np.array(ser_data['imageData'],dtype = 'float64')
+
+                ser_array = (map01(ser_array)*255).astype('uint8')
+                self.ori_image = Image.fromarray(ser_array,'L')
+            else:
+                self.ori_image = Image.open(self.imagePath_content).convert('L')
 
             self.width, self.height = self.ori_image.size
             pix_image = PIL2Pixmap(self.ori_image)
@@ -141,19 +152,21 @@ class Code_MainWindow(Ui_MainWindow):
 
         if self.split.isChecked():
 
-            if self.height > 1024 and self.height < 1600:
+            if self.height > 1024 and self.height < 2000:
                 blk_row = 2
-            elif self.height >1600:
-                blk_row = 4
             else:
-                blk_row = 1
+                if self.height >2000:
+                    blk_row = 4
+                else:
+                    blk_row = 1
 
-            if self.width > 1024 and self.width < 1600:
+            if self.width > 1024 and self.width < 2000:
                 blk_col = 2
-            elif self.width >1600:
-                blk_col = 4
             else:
-                blk_col = 1
+                if self.width >2000:
+                    blk_col = 4
+                else:
+                    blk_col = 1
         else:
             blk_col = 1
             blk_row = 1
@@ -164,9 +177,10 @@ class Code_MainWindow(Ui_MainWindow):
         for r in range(0, blk_row):
             for c in range(0, blk_col):
 
-                inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = 2)
+                inner_blk, outer_blk = GetIndexRangeOfBlk(self.height, self.width, blk_row, blk_col, r,c, over_lap = int(self.width*0.01))
                 temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
                 temp_result = load_model(model_path, self.model_num, temp_image, self.cuda)
+#                temp_result = map01(temp_result)
                 result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
                                           result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
 
@@ -258,6 +272,9 @@ class Code_MainWindow(Ui_MainWindow):
                 fill = 'red', outline = 'red')
 
         pix_image = PIL2Pixmap(self.out_markers)
+        self.preprocess.setPixmap(pix_image)
+        self.preprocess.show()
+        pix_image = PIL2Pixmap(self.ori_markers)
         self.detect_result.setPixmap(pix_image)
         self.detect_result.show()
 #        del props
@@ -268,13 +285,15 @@ class Code_MainWindow(Ui_MainWindow):
         self.se_num.setValue(0)
         self.preprocess.clear()
         self.detect_result.clear()
-        del self.ori_content
+#        del self.ori_content
 #        del self.props
 
     def GetSavePath(self):
 
         file_name = self.imagePath_content.split('/')[-1]
         suffix = '.' + file_name.split('.')[-1]
+        if suffix == '.ser':
+            suffix = '.png'
         name_no_suffix = file_name.replace(suffix, '')
         if not self.change_size.currentText() == 'Do Nothing':
             name_no_suffix = name_no_suffix + '_' + self.change_size.currentText()
