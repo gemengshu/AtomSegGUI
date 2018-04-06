@@ -5,7 +5,6 @@
 # Created by: PyQt5 UI code generator 5.6
 #
 # WARNING! All changes made in this file will be lost!
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5
 
@@ -142,6 +141,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.change_size.addItem("")
         self.change_size.addItem("")
         self.change_size.addItem("")
+        self.change_size.addItem("")
+        self.change_size.addItem("")
         self.set_thre = QtWidgets.QCheckBox(self.centralwidget)
         self.set_thre.setGeometry(QtCore.QRect(880, 400, 111, 21))
         self.set_thre.setChecked(False)
@@ -225,8 +226,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.change_size.setItemText(0, _translate("MainWindow", "Do Nothing"))
         self.change_size.setItemText(1, _translate("MainWindow", "Down sample  by 2"))
         self.change_size.setItemText(2, _translate("MainWindow", "Up sample by 2"))
-        self.change_size.setItemText(3, _translate("MainWindow", "Down sample by 4"))
-        self.change_size.setItemText(4, _translate("MainWindow", "Up sample by 4"))
+        self.change_size.setItemText(3, _translate("MainWindow", "Down sample by 3"))
+        self.change_size.setItemText(4, _translate("MainWindow", "Up sample by 3"))
+        self.change_size.setItemText(5, _translate("MainWindow", "Down sample by 4"))
+        self.change_size.setItemText(6, _translate("MainWindow", "Up sample by 4"))
         self.set_thre.setText(_translate("MainWindow", "Set Threshold"))
         self.lineEdit_2.setText(_translate("MainWindow", "%"))
 

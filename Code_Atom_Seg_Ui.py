@@ -113,15 +113,23 @@ class Code_MainWindow(Ui_MainWindow):
                 self.width, self.height = self.ori_image.size
                 self.ori_content = self.ori_image.resize((self.width*2, self.height*2), Image.BICUBIC)
             else:
-                if self.change_size.currentText() == 'Down sample by 4':
+                if self.change_size.currentText() == 'Down sample by 3':
                     self.width, self.height = self.ori_image.size
-                    self.ori_content = self.ori_image.resize((self.width//4, self.height//4), Image.BILINEAR)
+                    self.ori_content = self.ori_image.resize((self.width//3, self.height//3), Image.BILINEAR)
                 else:
-                    if self.change_size.currentText() == 'Up sample by 4':
+                    if self.change_size.currentText() == 'Up sample by 3':
                         self.width, self.height = self.ori_image.size
-                        self.ori_content = self.ori_image.resize((self.width*4, self.height*4), Image.BICUBIC)
-                    else: 
-                        self.ori_content = self.ori_image
+                        self.ori_content = self.ori_image.resize((self.width*3, self.height*3), Image.BICUBIC)
+                    else:
+                        if self.change_size.currentText() == 'Down sample by 4':
+                            self.width, self.height = self.ori_image.size
+                            self.ori_content = self.ori_image.resize((self.width//4, self.height//4), Image.BILINEAR)
+                        else:
+                            if self.change_size.currentText() == 'Up sample by 4':
+                                self.width, self.height = self.ori_image.size
+                                self.ori_content = self.ori_image.resize((self.width*4, self.height*4), Image.BICUBIC)
+                            else: 
+                                self.ori_content = self.ori_image
         
 
         pix_image = PIL2Pixmap(self.ori_content)

@@ -439,6 +439,16 @@
     </item>
     <item>
      <property name="text">
+      <string>Down sample by 3</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Up sample by 3</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
       <string>Down sample by 4</string>
      </property>
     </item>
