@@ -87,7 +87,7 @@ class Code_MainWindow(Ui_MainWindow):
         self.imagePath_content, _ = QFileDialog.getOpenFileName(self,
                                                             "open",
                                                             "/home/",
-                                                            "All Files (*);; Image Files (*.png *.tif *.jpg *.ser)")
+                                                            "All Files (*);; Image Files (*.png *.tif *.jpg *.ser *.dm3)")
 
         if self.imagePath_content:
             self.imagePath.setText(self.imagePath_content)
@@ -101,7 +101,14 @@ class Code_MainWindow(Ui_MainWindow):
                 ser_array = (map01(ser_array)*255).astype('uint8')
                 self.ori_image = Image.fromarray(ser_array,'L')
             else:
-                self.ori_image = Image.open(self.imagePath_content).convert('L')
+                if suffix == '.dm3':
+                    import dm3_lib as dm3
+                    data = dm3.DM3(self.imagePath_content).imagedata
+                    data = np.array(data, dtype = 'float64')
+                    data = (map01(data) * 255).astype('uint8')
+                    self.ori_image = Image.fromarray(data, mode = 'L')
+                else: 
+                    self.ori_image = Image.open(self.imagePath_content).convert('L')
 
             self.width, self.height = self.ori_image.size
             pix_image = PIL2Pixmap(self.ori_image)
@@ -294,6 +301,9 @@ class Code_MainWindow(Ui_MainWindow):
         suffix = '.' + file_name.split('.')[-1]
         if suffix == '.ser':
             suffix = '.png'
+        else:
+            if suffix == '.dm3':
+                suffix = '.png'
         name_no_suffix = file_name.replace(suffix, '')
         if not self.change_size.currentText() == 'Do Nothing':
             name_no_suffix = name_no_suffix + '_' + self.change_size.currentText()
