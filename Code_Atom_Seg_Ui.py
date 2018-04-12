@@ -24,6 +24,7 @@ from skimage.filters import sobel
 from skimage.measure import regionprops
 from skimage.draw import set_color
 from utils import GetIndexRangeOfBlk, load_model, PIL2Pixmap, map01
+import scipy.io as scio
 
 
 class Code_MainWindow(Ui_MainWindow):
@@ -52,7 +53,7 @@ class Code_MainWindow(Ui_MainWindow):
         self.out_markers = None  #for saving usage, it's a rgb image of result after denoising, and with detection result on it
         self.model_output_content = None # 2d array of model output
 
-
+        self.result = None
         self.denoised_image = None
         self.props = None
 
@@ -186,7 +187,7 @@ class Code_MainWindow(Ui_MainWindow):
             blk_row = 1
 
 
-        result = np.zeros((self.height, self.width)) - 100
+        self.result = np.zeros((self.height, self.width)) - 100
 
         for r in range(0, blk_row):
             for c in range(0, blk_col):
@@ -195,10 +196,10 @@ class Code_MainWindow(Ui_MainWindow):
                 temp_image = self.ori_content.crop((outer_blk[0], outer_blk[1], outer_blk[2], outer_blk[3]))
                 temp_result = load_model(model_path, self.model_num, temp_image, self.cuda)
 #                temp_result = map01(temp_result)
-                result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
-                                          result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
+                self.result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]] = np.maximum(temp_result,
+                                          self.result[outer_blk[1] : outer_blk[3], outer_blk[0] : outer_blk[2]])
 
-        self.model_output_content = map01(result)
+        self.model_output_content = map01(self.result)
         self.model_output_content = (self.model_output_content * 255 / np.max(self.model_output_content)).astype('uint8')
         self.output_image = Image.fromarray((self.model_output_content), mode = 'L')
         pix_image = PIL2Pixmap(self.output_image)
@@ -207,7 +208,7 @@ class Code_MainWindow(Ui_MainWindow):
         self.model_output.show()
         del temp_image
         del temp_result
-        del result # free memory caused by temporary matrix-result
+        
 
     def LoadModel(self):
 
@@ -271,7 +272,7 @@ class Code_MainWindow(Ui_MainWindow):
 
         del elevation_map
         del markers, seg_1,filled_regions,label_objects, nb_labels
-        del ori_array
+
 
         draw_out = ImageDraw.Draw(self.out_markers)
         draw_ori = ImageDraw.Draw(self.ori_markers)
@@ -299,6 +300,10 @@ class Code_MainWindow(Ui_MainWindow):
         self.se_num.setValue(0)
         self.preprocess.clear()
         self.detect_result.clear()
+        del self.result
+
+        self.result = None
+#        self.ori_array = None
 #        del self.ori_content
 #        del self.props
 
@@ -354,6 +359,10 @@ class Code_MainWindow(Ui_MainWindow):
     def Save(self):
         opt = self.save_option.currentText()
         _path, suffix = self.GetSavePath()
+        new_save_name = _path + '_output_' + self.modelPath_content + '.mat'
+        scio.savemat(new_save_name, {'result':self.result})
+        new_save_name = _path + '_ori_' + self.modelPath_content + '.mat'
+        scio.savemat(new_save_name, {'origin': np.array(self.ori_content)})
 
         if  not _path:
             return
@@ -382,11 +391,17 @@ class Code_MainWindow(Ui_MainWindow):
             for p in self.props:
                 c_y, c_x = p.centroid
                 min_row, min_col, max_row, max_col = p.bbox
-                file.write( "%s"%((c_y, c_x, min_row, min_col, max_row, max_col),))
+                c_y_int = int(min(max(round(c_y),0),self.height))
+                c_x_int = int(min(max(round(c_x),0),self.width))
+
+                file.write( "%s"%((c_y, c_x, min_row, min_col, max_row, max_col,self.result[c_y_int,c_x_int]),))
+                
                 file.write("\n")
             file.close()
 
         if opt == 'Save ALL':
+            new_save_name = _path + suffix
+            self.ori_content.save(new_save_name)
             new_save_name = _path + '_output_' + self.modelPath_content + suffix
             self.output_image.save(new_save_name)
             new_save_name = _path + '_origin_' + self.modelPath_content + suffix
@@ -404,7 +419,10 @@ class Code_MainWindow(Ui_MainWindow):
             for p in self.props:
                 c_y, c_x = p.centroid
                 min_row, min_col, max_row, max_col = p.bbox
-                file.write( "%s"%((c_y, c_x, min_row, min_col, max_row, max_col),))
+                c_y_int = int(min(max(round(c_y),0),self.height))
+                c_x_int = int(min(max(round(c_x),0),self.width))
+
+                file.write( "%s"%((c_y, c_x, min_row, min_col, max_row, max_col,self.result[c_y_int,c_x_int]),))
                 file.write("\n")
             file.close()
 
