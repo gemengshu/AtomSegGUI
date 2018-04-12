@@ -57,6 +57,8 @@ class Code_MainWindow(Ui_MainWindow):
         self.denoised_image = None
         self.props = None
 
+        self.imarray_original = None
+
         self.__models = {
                 'Model 1' : 1,
                 'Model 2' : 2,
@@ -98,25 +100,26 @@ class Code_MainWindow(Ui_MainWindow):
                 import serReader
                 ser_data = serReader.serReader(self.imagePath_content)
                 ser_array = np.array(ser_data['imageData'],dtype = 'float64')
-
+                self.imarray_original = ser_array
                 ser_array = (map01(ser_array)*255).astype('uint8')
                 self.ori_image = Image.fromarray(ser_array,'L')
             else:
                 if suffix == '.dm3':
                     import dm3_lib as dm3
                     data = dm3.DM3(self.imagePath_content).imagedata
+                    self.imarray_original = np.array(data)
                     data = np.array(data, dtype = 'float64')
                     data = (map01(data) * 255).astype('uint8')
                     self.ori_image = Image.fromarray(data, mode = 'L')
                 else: 
-                    if suffix = '.tif':
+                    if suffix == '.tif':
                         im = Image.open(self.imagePath_content).convert('L')
-                        self.imarray_original = np.array(im)
-                        imarray = (self.imarray_original - np.min(self.imarray_original))/
-                        (np.max(self.imarray_original) - np.min(self.imarray_original))
-                        self.ori_image = Image.fromarray(imarray, mode = 'L')
+                        self.imarray_original = np.array(im, dtype = 'float64')
+              
+                        self.ori_image = Image.fromarray((map01(self.imarray_original) * 255).astype('uint8'), mode = 'L')
                     else:
                         self.ori_image = Image.open(self.imagePath_content).convert('L')
+                        self.imarray_original = np.array(self.ori_image)
 
             self.width, self.height = self.ori_image.size
             pix_image = PIL2Pixmap(self.ori_image)
@@ -312,11 +315,18 @@ class Code_MainWindow(Ui_MainWindow):
         file_name = self.imagePath_content.split('/')[-1]
         suffix = '.' + file_name.split('.')[-1]
         if suffix == '.ser':
+            name_no_suffix = file_name.replace(suffix, '')
             suffix = '.png'
         else:
             if suffix == '.dm3':
+                name_no_suffix = file_name.replace(suffix, '')
                 suffix = '.png'
-        name_no_suffix = file_name.replace(suffix, '')
+            else:
+                if suffix == '.tif':
+                    name_no_suffix = file_name.replace(suffix, '')
+                    suffix = '.png'
+                else:
+                    name_no_suffix = file_name.replace(suffix, '')
         if not self.change_size.currentText() == 'Do Nothing':
             name_no_suffix = name_no_suffix + '_' + self.change_size.currentText()
         has_content = True
@@ -362,7 +372,7 @@ class Code_MainWindow(Ui_MainWindow):
         new_save_name = _path + '_output_' + self.modelPath_content + '.mat'
         scio.savemat(new_save_name, {'result':self.result})
         new_save_name = _path + '_ori_' + self.modelPath_content + '.mat'
-        scio.savemat(new_save_name, {'origin': np.array(self.ori_content)})
+        scio.savemat(new_save_name, {'origin': self.imarray_original})
 
         if  not _path:
             return
