@@ -108,7 +108,14 @@ class Code_MainWindow(Ui_MainWindow):
                     data = (map01(data) * 255).astype('uint8')
                     self.ori_image = Image.fromarray(data, mode = 'L')
                 else: 
-                    self.ori_image = Image.open(self.imagePath_content).convert('L')
+                    if suffix = '.tif':
+                        im = Image.open(self.imagePath_content).convert('L')
+                        self.imarray_original = np.array(im)
+                        imarray = (self.imarray_original - np.min(self.imarray_original))/
+                        (np.max(self.imarray_original) - np.min(self.imarray_original))
+                        self.ori_image = Image.fromarray(imarray, mode = 'L')
+                    else:
+                        self.ori_image = Image.open(self.imagePath_content).convert('L')
 
             self.width, self.height = self.ori_image.size
             pix_image = PIL2Pixmap(self.ori_image)
