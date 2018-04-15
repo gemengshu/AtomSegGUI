@@ -60,25 +60,23 @@ class Code_MainWindow(Ui_MainWindow):
         self.imarray_original = None
 
         self.__models = {
-                'Model 1' : 1,
-                'Model 2' : 2,
-                'Model 3' : 3,
-                'Model 4' : 4,
-                'Model 5' : 5,
-                'Model 6' : 6,
-                'circularMask': 7,
-                'guassianMask': 8,
-                'denoise': 9,
-                'denoise&bgremoval': 10,
-                'denoise&bgremoval&superres': 11
+                'circularMask_mse_beta' : 1,
+                'denoise&airysuperrez_beta' : 2,
+                'circularMask_chi10_beta' : 3,
+                'circularMask_chi100_beta' : 4,
+                'gaussianMask+' : 5,
+                'circularMask': 6,
+                'guassianMask': 7,
+                'denoise': 8,
+                'denoise&bgremoval': 9,
+                'denoise&bgremoval&superres': 10
         }
 
-        self.__model_paths = ['/model1.pth',
-                              '/model2.pth',
-                              '/model3.pth',
-                              '/atomseg_bupt_new_10/model_epoch_200.pth',
-                              '/atomseg_bupt_new_100/model_epoch_200.pth',
-                              '/atom_seg_gaussian_mask/model_epoch_200.pth',
+        self.__model_paths = ['/circularMask_mse_beta.pth',
+                              '/denoise&airysuperrez_beta.pth',
+                              '/circularMask_chi10_beta.pth',
+                              '/circularMask_chi100_beta.pth',
+                              '/gaussianMask+.pth',
                               '/circularMask.pth',
                               '/guassianMask.pth',
                               '/denoise.pth',

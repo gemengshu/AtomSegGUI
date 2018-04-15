@@ -34,19 +34,17 @@ def GetIndexRangeOfBlk(height, width, blk_row, blk_col, blk_r, blk_c, over_lap =
 
 	return (upper_left_c, upper_left_r, lower_right_c, lower_right_r), (ol_upper_left_c, ol_upper_left_r, ol_lower_right_c, ol_lower_right_r)
 
-"""Model 1 : /home/student/Documents/u-net_pytorch/epochs200_layer3_ori_256/"""
-"""Model 2 : /home/student/Documents/u-net-pytorch-original/lr001_weightdecay00001/"""
-"""Model 3 : /home/student/Documents/u-net_denoising/dataset_small_mask/"""
-"""Model 4 : /home/student/Documents/Atom Segmentation APP/AtomSegGUI/atomseg_bupt_new_10/"""
-"""Model 5 : /home/student/Documents/Atom Segmentation APP/AtomSegGUI/atomseg_bupt_new_100/"""
-"""Model 6 : /home/student/Documents/Atom Segmentation APP/AtomSegGUI/atom_seg_gaussian_mask/"""
+
+"""circularMask_mse_beta : /home/student/Documents/u-net-pytorch-original/lr001_weightdecay00001/"""
+"""denoise&airysuperrez_beta : /home/student/Documents/u-net_denoising/dataset_small_mask/"""
+"""circularMask_chi10_beta : /home/student/Documents/Atom Segmentation APP/AtomSegGUI/atomseg_bupt_new_10/"""
+"""circularMask_chi100_beta : /home/student/Documents/Atom Segmentation APP/AtomSegGUI/atomseg_bupt_new_100/"""
+"""gaussianMask+ : /home/student/Documents/Atom Segmentation APP/AtomSegGUI/atom_seg_gaussian_mask/"""
 
 
 def load_model(model_path, model_num, data, cuda):
-	if model_num == 1:
-		from unet_softsign import UNet
-	else:
-		from unet_sigmoid import UNet
+
+	from unet_sigmoid import UNet
 #	model_name = 'model' + str(model_num)
 #	module = importlib.import_module(model_name, package = None)
 	use_padding = False
